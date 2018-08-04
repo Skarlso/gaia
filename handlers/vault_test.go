@@ -16,10 +16,7 @@ import (
 )
 
 func TestVaultWorkflowAddListDelete(t *testing.T) {
-	dataDir, err := ioutil.TempDir("", "temp")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
+	dataDir := os.TempDir()
 
 	defer func() {
 		gaia.Cfg = nil
@@ -33,16 +30,14 @@ func TestVaultWorkflowAddListDelete(t *testing.T) {
 		VaultPath: dataDir,
 	}
 
-	dataStore, _ := services.StorageService()
-	err = dataStore.Init()
-	if err != nil {
-		t.Fatalf("cannot initialize store: %v", err.Error())
-	}
-
-	_, err = services.CertificateService()
+	ce, err := services.CertificateService()
 	if err != nil {
 		t.Fatalf("cannot initialize certificate service: %v", err.Error())
 	}
+
+	// Make sure the cert exists because if the service was alreay
+	// created, Init won't be called again.
+	ce.CreateSignedCert()
 
 	e := echo.New()
 	InitHandlers(e)

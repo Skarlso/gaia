@@ -3,12 +3,15 @@ package handlers
 import (
 	"bytes"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/gaia-pipeline/gaia/security"
 
 	"github.com/gaia-pipeline/gaia"
 	"github.com/gaia-pipeline/gaia/pipeline"
@@ -17,24 +20,17 @@ import (
 	"github.com/labstack/echo"
 )
 
-type MockVaultStorer struct {
+type HookMockVault struct {
+	security.VaultAPI
 	Error error
 }
 
-var store []byte
-
-func (mvs *MockVaultStorer) Init() error {
-	store = make([]byte, 0)
-	return mvs.Error
+func (hmv *HookMockVault) LoadSecrets() error {
+	return nil
 }
 
-func (mvs *MockVaultStorer) Read() ([]byte, error) {
-	return store, mvs.Error
-}
-
-func (mvs *MockVaultStorer) Write(data []byte) error {
-	store = data
-	return mvs.Error
+func (hmv *HookMockVault) Get(key string) ([]byte, error) {
+	return []byte("superawesomesecretgithubpassword"), nil
 }
 
 func TestHookReceive(t *testing.T) {
@@ -54,18 +50,11 @@ func TestHookReceive(t *testing.T) {
 		VaultPath: dataDir,
 		HomePath:  dataDir,
 	}
-	_, err = services.CertificateService()
-	if err != nil {
-		t.Fatalf("cannot initialize certificate service: %v", err.Error())
-	}
 
-	m := new(MockVaultStorer)
-	v, _ := services.VaultService(m)
-	v.Add("GITHUB_WEBHOOK_SECRET", []byte("superawesomesecretgithubpassword"))
-	defer func() {
-		v.Remove("GITHUB_WEBHOOK_SECRET")
-	}()
+	m := new(HookMockVault)
+	services.MockVaultService(m)
 	e := echo.New()
+	defer services.ClearVaultService()
 
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()
@@ -101,6 +90,8 @@ func TestHookReceive(t *testing.T) {
 
 		// Expected failure because repository does not exist
 		if rec.Code != http.StatusInternalServerError {
+			body, _ := ioutil.ReadAll(rec.Body)
+			log.Println("body was: ", string(body))
 			t.Fatalf("want response code %v got %v", http.StatusInternalServerError, rec.Code)
 		}
 

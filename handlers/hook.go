@@ -93,6 +93,7 @@ func parse(secret []byte, req *http.Request) (Hook, error) {
 // GitWebHook handles callbacks from GitHub's webhook system.
 func GitWebHook(c echo.Context) error {
 	vault, _ := services.VaultService(nil)
+	vault.LoadSecrets()
 	secret, err := vault.Get("GITHUB_WEBHOOK_SECRET")
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Please define GITHUB_WEBHOOK_SECRET to use as password for hooks.")

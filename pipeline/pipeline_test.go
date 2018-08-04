@@ -258,6 +258,7 @@ func TestRenameBinary(t *testing.T) {
 	tmp := os.TempDir()
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
+	gaia.Cfg.HomePath = tmp
 
 	p := gaia.Pipeline{
 		Name:    "Pipeline A",
@@ -295,6 +296,7 @@ func TestDeleteBinary(t *testing.T) {
 	tmp := os.TempDir()
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
+	gaia.Cfg.HomePath = tmp
 
 	p := gaia.Pipeline{
 		Name:    "Pipeline A",

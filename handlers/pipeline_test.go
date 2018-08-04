@@ -118,6 +118,7 @@ func TestPipelineUpdate(t *testing.T) {
 
 	// Initialize store
 	dataStore, _ := services.StorageService()
+	defer services.ClearStorageService()
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()
 	pipeline.GlobalActivePipelines = ap
@@ -204,10 +205,8 @@ func TestPipelineDelete(t *testing.T) {
 
 	// Initialize store
 	dataStore, _ := services.StorageService()
-	err = dataStore.Init()
-	if err != nil {
-		t.Fatalf("cannot initialize store: %v", err.Error())
-	}
+	dataStore.Init()
+	defer services.ClearStorageService()
 
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()

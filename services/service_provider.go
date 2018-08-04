@@ -1,6 +1,8 @@
 package services
 
 import (
+	"reflect"
+
 	"github.com/gaia-pipeline/gaia"
 	"github.com/gaia-pipeline/gaia/plugin"
 	"github.com/gaia-pipeline/gaia/scheduler"
@@ -26,7 +28,7 @@ var vaultService security.VaultAPI
 // initialized once in the main.go. If it wouldn't work, main would
 // os.Exit(1) and the rest of the application would just stop.
 func StorageService() (store.GaiaStore, error) {
-	if storeService != nil {
+	if storeService != nil && !reflect.ValueOf(storeService).IsNil() {
 		return storeService, nil
 	}
 	storeService = store.NewBoltStore()
@@ -52,7 +54,7 @@ func MockStorageService(store store.GaiaStore) {
 // initialized once in the main.go. If it wouldn't work, main would
 // os.Exit(1) and the rest of the application would just stop.
 func SchedulerService() (scheduler.GaiaScheduler, error) {
-	if schedulerService != nil {
+	if schedulerService != nil && !reflect.ValueOf(schedulerService).IsNil() {
 		return schedulerService, nil
 	}
 	pS := &plugin.Plugin{}
@@ -73,7 +75,7 @@ func MockSchedulerService(scheduler scheduler.GaiaScheduler) {
 
 // CertificateService creates a certificate manager service.
 func CertificateService() (security.CAAPI, error) {
-	if certificateService != nil {
+	if certificateService != nil && !reflect.ValueOf(certificateService).IsNil() {
 		return certificateService, nil
 	}
 
@@ -94,7 +96,7 @@ func MockCertificateService(service security.CAAPI) {
 
 // VaultService creates a vault manager service.
 func VaultService(vaultStore security.VaultStorer) (security.VaultAPI, error) {
-	if vaultService != nil {
+	if vaultService != nil && !reflect.ValueOf(vaultService).IsNil() {
 		return vaultService, nil
 	}
 
@@ -111,4 +113,20 @@ func VaultService(vaultStore security.VaultStorer) (security.VaultAPI, error) {
 // for the internal vault service manager.
 func MockVaultService(service security.VaultAPI) {
 	vaultService = service
+}
+
+func ClearVaultService() {
+	vaultService = nil
+}
+
+func ClearStorageService() {
+	storeService = nil
+}
+
+func ClearSchedulerService() {
+	schedulerService = nil
+}
+
+func ClearCertificateService() {
+	certificateService = nil
 }
