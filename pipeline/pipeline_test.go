@@ -255,18 +255,20 @@ func TestRemoveDeletedPipelines(t *testing.T) {
 }
 
 func TestRenameBinary(t *testing.T) {
-	tmp := os.TempDir()
+	os.Mkdir("tmp", os.ModeDir|0777)
+	tmp := "tmp"
+	defer os.RemoveAll("tmp")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
 	gaia.Cfg.HomePath = tmp
 
 	p := gaia.Pipeline{
-		Name:    "Pipeline A",
+		Name:    "PipelineA",
 		Type:    gaia.PTypeGolang,
 		Created: time.Now(),
 	}
 
-	newName := "Pipeline B"
+	newName := "PipelineB"
 
 	src := filepath.Join(tmp, appendTypeToName(p.Name, p.Type))
 	dst := filepath.Join(tmp, appendTypeToName(newName, p.Type))
@@ -293,13 +295,15 @@ func TestRenameBinary(t *testing.T) {
 }
 
 func TestDeleteBinary(t *testing.T) {
-	tmp := os.TempDir()
+	os.Mkdir("tmp", os.ModeDir|0777)
+	tmp := "tmp"
+	defer os.RemoveAll("tmp")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
 	gaia.Cfg.HomePath = tmp
 
 	p := gaia.Pipeline{
-		Name:    "Pipeline A",
+		Name:    "PipelineA",
 		Type:    gaia.PTypeGolang,
 		Created: time.Now(),
 	}

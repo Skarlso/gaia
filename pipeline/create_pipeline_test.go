@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/gaia-pipeline/gaia/services"
@@ -43,7 +44,7 @@ func TestCreatePipelineUnknownType(t *testing.T) {
 	})
 	mcp := new(mockCreatePipelineStore)
 	services.MockStorageService(mcp)
-	defer services.ClearStorageService()
+	defer func() { services.MockStorageService(nil) }()
 	cp := new(gaia.CreatePipeline)
 	cp.Pipeline.Type = gaia.PTypeUnknown
 	CreatePipeline(cp)
@@ -69,7 +70,7 @@ func TestCreatePipelineMissingGitURL(t *testing.T) {
 	})
 	mcp := new(mockCreatePipelineStore)
 	services.MockStorageService(mcp)
-	defer services.ClearStorageService()
+	defer func() { services.MockStorageService(nil) }()
 	cp := new(gaia.CreatePipeline)
 	cp.Pipeline.Type = gaia.PTypeGolang
 	CreatePipeline(cp)
@@ -93,10 +94,10 @@ func TestCreatePipelineFailedToUpdatePipeline(t *testing.T) {
 	mcp := new(mockCreatePipelineStore)
 	mcp.Error = errors.New("failed")
 	services.MockStorageService(mcp)
-	defer services.ClearStorageService()
+	defer func() { services.MockStorageService(nil) }()
 	cp := new(gaia.CreatePipeline)
 	cp.Pipeline.Type = gaia.PTypeGolang
-	cp.Pipeline.Repo.URL = "https://github.com/gaia-pipeline/go-test-example"
+	cp.Pipeline.Repo.URL = "https://github.com/gaia-pipeline/pipeline-test"
 	CreatePipeline(cp)
 	body, _ := ioutil.ReadAll(buf)
 	if !bytes.Contains(body, []byte("cannot put create pipeline into store: error=failed")) {
@@ -107,7 +108,9 @@ func TestCreatePipelineFailedToUpdatePipeline(t *testing.T) {
 func TestCreatePipeline(t *testing.T) {
 	os.Mkdir("tmp", os.ModeDir|0777)
 	defer os.RemoveAll("tmp")
-	tmp := "tmp"
+	defer os.Remove("_golang")
+	pwd, _ := os.Getwd()
+	tmp := filepath.Join(pwd, "tmp")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.HomePath = tmp
 	buf := new(bytes.Buffer)
@@ -118,10 +121,10 @@ func TestCreatePipeline(t *testing.T) {
 	})
 	mcp := new(mockCreatePipelineStore)
 	services.MockStorageService(mcp)
-	defer services.ClearStorageService()
+	defer func() { services.MockStorageService(nil) }()
 	cp := new(gaia.CreatePipeline)
 	cp.Pipeline.Type = gaia.PTypeGolang
-	cp.Pipeline.Repo.URL = "https://github.com/gaia-pipeline/go-test-example"
+	cp.Pipeline.Repo.URL = "https://github.com/gaia-pipeline/pipeline-test"
 	CreatePipeline(cp)
 	if cp.StatusType != gaia.CreatePipelineSuccess {
 		t.Fatal("pipeline status was not success. was: ", cp.StatusType)

@@ -114,19 +114,3 @@ func VaultService(vaultStore security.VaultStorer) (security.VaultAPI, error) {
 func MockVaultService(service security.VaultAPI) {
 	vaultService = service
 }
-
-func ClearVaultService() {
-	vaultService = nil
-}
-
-func ClearStorageService() {
-	storeService = nil
-}
-
-func ClearSchedulerService() {
-	schedulerService = nil
-}
-
-func ClearCertificateService() {
-	certificateService = nil
-}

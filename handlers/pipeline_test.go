@@ -118,7 +118,7 @@ func TestPipelineUpdate(t *testing.T) {
 
 	// Initialize store
 	dataStore, _ := services.StorageService()
-	defer services.ClearStorageService()
+	defer func() { services.MockStorageService(nil) }()
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()
 	pipeline.GlobalActivePipelines = ap
@@ -206,7 +206,7 @@ func TestPipelineDelete(t *testing.T) {
 	// Initialize store
 	dataStore, _ := services.StorageService()
 	dataStore.Init()
-	defer services.ClearStorageService()
+	defer func() { services.MockStorageService(nil) }()
 
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()

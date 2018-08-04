@@ -54,8 +54,7 @@ func TestHookReceive(t *testing.T) {
 	m := new(HookMockVault)
 	services.MockVaultService(m)
 	e := echo.New()
-	defer services.ClearVaultService()
-
+	defer func() { services.MockVaultService(nil) }()
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()
 	pipeline.GlobalActivePipelines = ap
