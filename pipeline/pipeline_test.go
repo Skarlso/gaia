@@ -115,7 +115,7 @@ func TestReplace(t *testing.T) {
 		Name: "Pipeline A",
 		Type: gaia.PTypeGolang,
 		Repo: gaia.GitRepo{
-			URL:       "https://github.com/gaia-pipeline/go-test-example-1",
+			URL:       "https://github.com/gaia-pipeline/pipeline-test-1",
 			LocalDest: "tmp",
 		},
 		Created: time.Now(),
@@ -126,7 +126,7 @@ func TestReplace(t *testing.T) {
 		Name: "Pipeline A",
 		Type: gaia.PTypeGolang,
 		Repo: gaia.GitRepo{
-			URL:       "https://github.com/gaia-pipeline/go-test-example-2",
+			URL:       "https://github.com/gaia-pipeline/pipeline-test-2",
 			LocalDest: "tmp",
 		},
 		Created: time.Now(),
@@ -139,7 +139,7 @@ func TestReplace(t *testing.T) {
 	}
 
 	p := ap.GetByName("Pipeline A")
-	if p.Repo.URL != "https://github.com/gaia-pipeline/go-test-example-2" {
+	if p.Repo.URL != "https://github.com/gaia-pipeline/pipeline-test-2" {
 		t.Fatalf("The pipeline repo URL should have been replaced")
 	}
 }

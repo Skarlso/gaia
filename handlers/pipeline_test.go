@@ -84,7 +84,7 @@ func TestPipelineGitLSRemote(t *testing.T) {
 	})
 
 	t.Run("otherwise succeed", func(t *testing.T) {
-		repoURL := "https://github.com/gaia-pipeline/gaia"
+		repoURL := "https://github.com/gaia-pipeline/pipeline-test"
 		body := map[string]string{
 			"url":      repoURL,
 			"username": "admin",
