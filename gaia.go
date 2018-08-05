@@ -158,7 +158,6 @@ type Config struct {
 	PVal              int
 	ListenPort        string
 	HomePath          string
-	Hostname          string
 	VaultPath         string
 	DataPath          string
 	PipelinePath      string
