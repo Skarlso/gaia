@@ -296,9 +296,6 @@ func TestPipelineStart(t *testing.T) {
 		Created: time.Now(),
 	}
 
-	ms := new(mockScheduleService)
-	services.MockSchedulerService(ms)
-
 	// Add to active pipelines
 	ap.Append(p)
 
@@ -310,9 +307,11 @@ func TestPipelineStart(t *testing.T) {
 		c.SetParamNames("pipelineid")
 		c.SetParamValues("1")
 
+		ms := new(mockScheduleService)
 		pRun := new(gaia.PipelineRun)
 		pRun.ID = 999
 		ms.pipelineRun = pRun
+		services.MockSchedulerService(ms)
 
 		PipelineStart(c)
 
@@ -335,10 +334,12 @@ func TestPipelineStart(t *testing.T) {
 		c.SetParamNames("pipelineid")
 		c.SetParamValues("1")
 
+		ms := new(mockScheduleService)
 		pRun := new(gaia.PipelineRun)
 		pRun.ID = 999
 		ms.pipelineRun = pRun
 		ms.err = errors.New("failed to run pipeline")
+		services.MockSchedulerService(ms)
 
 		PipelineStart(c)
 
@@ -354,6 +355,9 @@ func TestPipelineStart(t *testing.T) {
 		c := e.NewContext(req, rec)
 		c.SetParamNames("pipelineid")
 		c.SetParamValues("1")
+
+		ms := new(mockScheduleService)
+		services.MockSchedulerService(ms)
 
 		PipelineStart(c)
 
