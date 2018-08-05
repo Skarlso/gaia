@@ -32,14 +32,10 @@ func (ms *mockScheduleService) SchedulePipeline(p *gaia.Pipeline) (*gaia.Pipelin
 }
 
 func TestPipelineGitLSRemote(t *testing.T) {
-	dataDir, err := ioutil.TempDir("", "temp")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
+	dataDir := os.TempDir()
 
 	defer func() {
 		gaia.Cfg = nil
-		os.RemoveAll(dataDir)
 	}()
 
 	gaia.Cfg = &gaia.Config{
@@ -105,19 +101,21 @@ func TestPipelineGitLSRemote(t *testing.T) {
 }
 
 func TestPipelineUpdate(t *testing.T) {
-	dataDir, err := ioutil.TempDir("", "temp")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
-	defer os.RemoveAll(dataDir)
+	tmp := "tmp"
+	os.Mkdir(tmp, 0744)
+	defer os.RemoveAll(tmp)
+	dataDir := tmp
 
 	gaia.Cfg = &gaia.Config{
-		Logger:   hclog.NewNullLogger(),
-		DataPath: dataDir,
+		Logger:       hclog.NewNullLogger(),
+		DataPath:     dataDir,
+		HomePath:     dataDir,
+		PipelinePath: dataDir,
 	}
 
 	// Initialize store
 	dataStore, _ := services.StorageService()
+	dataStore.Init()
 	defer func() { services.MockStorageService(nil) }()
 	// Initialize global active pipelines
 	ap := pipeline.NewActivePipelines()
@@ -142,7 +140,7 @@ func TestPipelineUpdate(t *testing.T) {
 	}
 
 	// Add to store
-	err = dataStore.PipelinePut(&pipeline1)
+	err := dataStore.PipelinePut(&pipeline1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,14 +189,14 @@ func TestPipelineUpdate(t *testing.T) {
 }
 
 func TestPipelineDelete(t *testing.T) {
-	dataDir, err := ioutil.TempDir("", "temp")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
-	defer os.RemoveAll(dataDir)
+	tmp := "tmp"
+	os.Mkdir(tmp, 0744)
+	defer os.RemoveAll(tmp)
+	dataDir := tmp
 
 	gaia.Cfg = &gaia.Config{
 		Logger:       hclog.NewNullLogger(),
+		HomePath:     dataDir,
 		DataPath:     dataDir,
 		PipelinePath: dataDir,
 	}
@@ -224,7 +222,7 @@ func TestPipelineDelete(t *testing.T) {
 	}
 
 	// Add to store
-	err = dataStore.PipelinePut(&p)
+	err := dataStore.PipelinePut(&p)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,8 +271,14 @@ func TestPipelineDelete(t *testing.T) {
 }
 
 func TestPipelineStart(t *testing.T) {
+	tmp := "tmp"
+	os.Mkdir(tmp, 0744)
+	defer os.RemoveAll(tmp)
 	gaia.Cfg = &gaia.Config{
-		Logger: hclog.NewNullLogger(),
+		Logger:       hclog.NewNullLogger(),
+		HomePath:     tmp,
+		DataPath:     tmp,
+		PipelinePath: tmp,
 	}
 
 	// Initialize global active pipelines

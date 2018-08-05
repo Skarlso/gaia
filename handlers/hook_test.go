@@ -34,14 +34,10 @@ func (hmv *HookMockVault) Get(key string) ([]byte, error) {
 }
 
 func TestHookReceive(t *testing.T) {
-	dataDir, err := ioutil.TempDir("", "temp")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
+	dataDir := os.TempDir()
 
 	defer func() {
 		gaia.Cfg = nil
-		os.RemoveAll(dataDir)
 	}()
 	gaia.Cfg = &gaia.Config{
 		Logger:    hclog.NewNullLogger(),

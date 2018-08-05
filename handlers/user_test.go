@@ -21,15 +21,13 @@ import (
 )
 
 func TestUserLoginHMACKey(t *testing.T) {
-
-	dataDir, err := ioutil.TempDir("", "hmac")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
+	tmp := "tmp"
+	os.Mkdir(tmp, 0744)
+	defer os.RemoveAll(tmp)
+	dataDir := tmp
 
 	defer func() {
 		gaia.Cfg = nil
-		os.RemoveAll(dataDir)
 	}()
 
 	gaia.Cfg = &gaia.Config{
@@ -77,14 +75,13 @@ func TestUserLoginHMACKey(t *testing.T) {
 }
 
 func TestUserLoginRSAKey(t *testing.T) {
-	dataDir, err := ioutil.TempDir("", "rsa")
-	if err != nil {
-		t.Fatalf("error creating data dir %v", err.Error())
-	}
+	tmp := "tmp"
+	os.Mkdir(tmp, 0744)
+	defer os.RemoveAll(tmp)
+	dataDir := tmp
 
 	defer func() {
 		gaia.Cfg = nil
-		os.RemoveAll(dataDir)
 	}()
 
 	key, _ := rsa.GenerateKey(rand.Reader, 2048)

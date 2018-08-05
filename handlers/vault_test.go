@@ -20,7 +20,6 @@ func TestVaultWorkflowAddListDelete(t *testing.T) {
 
 	defer func() {
 		gaia.Cfg = nil
-		os.RemoveAll(dataDir)
 	}()
 
 	gaia.Cfg = &gaia.Config{
