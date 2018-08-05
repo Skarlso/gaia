@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 
 	"io/ioutil"
-	"os"
 
 	"crypto/rand"
 	"crypto/rsa"
@@ -21,9 +20,7 @@ import (
 )
 
 func TestUserLoginHMACKey(t *testing.T) {
-	tmp := "tmp"
-	os.Mkdir(tmp, 0744)
-	defer os.RemoveAll(tmp)
+	tmp, _ := ioutil.TempDir("", "TestUserLoginHMACKey")
 	dataDir := tmp
 
 	defer func() {
@@ -75,9 +72,7 @@ func TestUserLoginHMACKey(t *testing.T) {
 }
 
 func TestUserLoginRSAKey(t *testing.T) {
-	tmp := "tmp"
-	os.Mkdir(tmp, 0744)
-	defer os.RemoveAll(tmp)
+	tmp, _ := ioutil.TempDir("", "TestUserLoginRSAKey")
 	dataDir := tmp
 
 	defer func() {

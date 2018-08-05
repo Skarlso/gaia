@@ -101,9 +101,7 @@ func TestPipelineGitLSRemote(t *testing.T) {
 }
 
 func TestPipelineUpdate(t *testing.T) {
-	tmp := "tmp"
-	os.Mkdir(tmp, 0744)
-	defer os.RemoveAll(tmp)
+	tmp, _ := ioutil.TempDir("", "TestPipelineUpdate")
 	dataDir := tmp
 
 	gaia.Cfg = &gaia.Config{
@@ -189,9 +187,7 @@ func TestPipelineUpdate(t *testing.T) {
 }
 
 func TestPipelineDelete(t *testing.T) {
-	tmp := "tmp"
-	os.Mkdir(tmp, 0744)
-	defer os.RemoveAll(tmp)
+	tmp, _ := ioutil.TempDir("", "TestPipelineDelete")
 	dataDir := tmp
 
 	gaia.Cfg = &gaia.Config{
@@ -271,9 +267,7 @@ func TestPipelineDelete(t *testing.T) {
 }
 
 func TestPipelineStart(t *testing.T) {
-	tmp := "tmp"
-	os.Mkdir(tmp, 0744)
-	defer os.RemoveAll(tmp)
+	tmp, _ := ioutil.TempDir("", "TestPipelineStart")
 	gaia.Cfg = &gaia.Config{
 		Logger:       hclog.NewNullLogger(),
 		HomePath:     tmp,

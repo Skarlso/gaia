@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io/ioutil"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/gaia-pipeline/gaia/services"
@@ -31,9 +29,7 @@ func (mcp *mockCreatePipelineStore) PipelinePut(p *gaia.Pipeline) error {
 }
 
 func TestCreatePipelineUnknownType(t *testing.T) {
-	os.Mkdir("tmp", os.ModeDir|0777)
-	defer os.RemoveAll("tmp")
-	tmp := "tmp"
+	tmp, _ := ioutil.TempDir("", "TestCreatePipelineUnknownType")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.HomePath = tmp
 	buf := new(bytes.Buffer)
@@ -57,9 +53,7 @@ func TestCreatePipelineUnknownType(t *testing.T) {
 }
 
 func TestCreatePipelineMissingGitURL(t *testing.T) {
-	os.Mkdir("tmp", os.ModeDir|0777)
-	defer os.RemoveAll("tmp")
-	tmp := "tmp"
+	tmp, _ := ioutil.TempDir("", "TestCreatePipelineMissingGitURL")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.HomePath = tmp
 	buf := new(bytes.Buffer)
@@ -80,9 +74,7 @@ func TestCreatePipelineMissingGitURL(t *testing.T) {
 }
 
 func TestCreatePipelineFailedToUpdatePipeline(t *testing.T) {
-	os.Mkdir("tmp", os.ModeDir|0777)
-	defer os.RemoveAll("tmp")
-	tmp := "tmp"
+	tmp, _ := ioutil.TempDir("", "TestCreatePipelineFailedToUpdatePipeline")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.HomePath = tmp
 	buf := new(bytes.Buffer)
@@ -106,11 +98,7 @@ func TestCreatePipelineFailedToUpdatePipeline(t *testing.T) {
 }
 
 func TestCreatePipeline(t *testing.T) {
-	os.Mkdir("tmp", os.ModeDir|0777)
-	defer os.RemoveAll("tmp")
-	defer os.Remove("_golang")
-	pwd, _ := os.Getwd()
-	tmp := filepath.Join(pwd, "tmp")
+	tmp, _ := ioutil.TempDir("", "TestCreatePipeline")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.HomePath = tmp
 	buf := new(bytes.Buffer)

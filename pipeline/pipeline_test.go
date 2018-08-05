@@ -255,12 +255,12 @@ func TestRemoveDeletedPipelines(t *testing.T) {
 }
 
 func TestRenameBinary(t *testing.T) {
-	os.Mkdir("tmp", os.ModeDir|0777)
-	tmp := "tmp"
-	defer os.RemoveAll("tmp")
+	tmp, _ := ioutil.TempDir("", "TestRenameBinary")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
 	gaia.Cfg.HomePath = tmp
+	gaia.Cfg.DataPath = tmp
+	defer os.Remove("_golang")
 
 	p := gaia.Pipeline{
 		Name:    "PipelineA",
@@ -295,12 +295,11 @@ func TestRenameBinary(t *testing.T) {
 }
 
 func TestDeleteBinary(t *testing.T) {
-	os.Mkdir("tmp", os.ModeDir|0777)
-	tmp := "tmp"
-	defer os.RemoveAll("tmp")
+	tmp, _ := ioutil.TempDir("", "TestDeleteBinary")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
 	gaia.Cfg.HomePath = tmp
+	gaia.Cfg.DataPath = tmp
 
 	p := gaia.Pipeline{
 		Name:    "PipelineA",
@@ -330,6 +329,8 @@ func TestGetExecPath(t *testing.T) {
 	tmp, _ := ioutil.TempDir("", "TestGetExecPath")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
+	gaia.Cfg.DataPath = tmp
+	gaia.Cfg.HomePath = tmp
 
 	p := gaia.Pipeline{
 		Name:    "Pipeline A",
