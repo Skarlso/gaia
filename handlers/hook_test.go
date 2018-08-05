@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -34,7 +33,7 @@ func (hmv *HookMockVault) Get(key string) ([]byte, error) {
 }
 
 func TestHookReceive(t *testing.T) {
-	dataDir := os.TempDir()
+	dataDir, _ := ioutil.TempDir("", "TestHookReceive")
 
 	defer func() {
 		gaia.Cfg = nil

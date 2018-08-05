@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/gaia-pipeline/gaia"
@@ -16,7 +15,7 @@ import (
 )
 
 func TestVaultWorkflowAddListDelete(t *testing.T) {
-	dataDir := os.TempDir()
+	dataDir, _ := ioutil.TempDir("", "TestVaultWorkflowAddListDelete")
 
 	defer func() {
 		gaia.Cfg = nil

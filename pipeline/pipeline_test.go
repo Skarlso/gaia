@@ -327,7 +327,7 @@ func TestDeleteBinary(t *testing.T) {
 }
 
 func TestGetExecPath(t *testing.T) {
-	tmp := os.TempDir()
+	tmp, _ := ioutil.TempDir("", "TestGetExecPath")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.PipelinePath = tmp
 

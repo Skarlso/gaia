@@ -32,7 +32,7 @@ func (ms *mockScheduleService) SchedulePipeline(p *gaia.Pipeline) (*gaia.Pipelin
 }
 
 func TestPipelineGitLSRemote(t *testing.T) {
-	dataDir := os.TempDir()
+	dataDir, _ := ioutil.TempDir("", "TestPipelineGitLSRemote")
 
 	defer func() {
 		gaia.Cfg = nil

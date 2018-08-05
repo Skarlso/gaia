@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -25,7 +26,7 @@ func TestGitCloneRepo(t *testing.T) {
 }
 
 func TestUpdateAllPipelinesRepositoryNotFound(t *testing.T) {
-	tmp := os.TempDir()
+	tmp, _ := ioutil.TempDir("", "TestUpdateAllPipelinesRepositoryNotFound")
 	gaia.Cfg = new(gaia.Config)
 	gaia.Cfg.HomePath = tmp
 	// Initialize shared logger
