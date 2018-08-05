@@ -1,19 +1,12 @@
 package pipeline
 
 import (
-	"context"
-	"path"
-	"regexp"
 	"strings"
 	"sync"
 
-	"github.com/gaia-pipeline/gaia/services"
-
-	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 
 	"github.com/gaia-pipeline/gaia"
-	"github.com/google/go-github/github"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/client"
@@ -153,45 +146,6 @@ func updateAllCurrentPipelines() {
 		}(p)
 	}
 	wg.Wait()
-}
-
-func createGithubWebhook(token string, repo *gaia.GitRepo) error {
-	vault, _ := services.VaultService(nil)
-	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	config := make(map[string]interface{})
-	config["url"] = gaia.Cfg.Hostname + "/pipeline/github/build-hook"
-	secret, err := vault.Get("GITHUB_WEBHOOK_SECRET")
-	if err != nil {
-		gaia.Cfg.Logger.Error("Please define secret GITHUB_WEBHOOK_SECRET to use as password for hooks.")
-		return err
-	}
-	config["secret"] = string(secret)
-	config["content_type"] = "json"
-
-	client := github.NewClient(tc)
-	repoName := path.Base(repo.URL)
-	repoName = strings.TrimSuffix(repoName, ".git")
-	// var repoLocation string
-	re := regexp.MustCompile("^(https|git)(:\\/\\/|@)([^\\/:]+)[\\/:]([^\\/:]+)\\/(.+)$")
-	m := re.FindAllStringSubmatch(repo.URL, -1)
-	repoUser := m[0][4]
-	hook, resp, err := client.Repositories.CreateHook(context.Background(), repoUser, repoName, &github.Hook{
-		Events: []string{"push"},
-		Name:   github.String("web"),
-		Active: github.Bool(true),
-		Config: config,
-	})
-	if err != nil {
-		gaia.Cfg.Logger.Error("error while trying to create webhook: ", "error", err.Error())
-		return err
-	}
-	gaia.Cfg.Logger.Info("hook created: ", github.Stringify(hook.Name), resp.Status)
-	gaia.Cfg.Logger.Info("hook url: ", hook.GetURL())
-	return nil
 }
 
 func getAuthInfo(repo *gaia.GitRepo) (transport.AuthMethod, error) {
