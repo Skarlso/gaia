@@ -303,9 +303,49 @@ type Config struct {
 	WorkerSecret      string
 	WorkerTags        string
 
+	// Pipeline Configuration files Location
+	PipelineConfigFilesLocation           string
+	WatchForNewPipelineConfigurationFiles bool
+
 	Bolt struct {
 		Mode os.FileMode
 	}
+}
+
+// PipelineConfigValue will be used to provide the ability to either get the
+// value as plaintext provided in the config file, or use Vault to gather the
+// it. If Vault is given, Gaia will look up the value in the Vault file.
+// This also means that the pipeline configurations can only be parsed once vault
+// is available.
+type PipelineConfigValue struct {
+	Vault     string `yaml:"vault,omitempty"`
+	Plaintext string `yaml:"plain,omitempty"`
+}
+
+// PipelineConfigurationCredentials provides values for configuring access
+// for pipelines.
+type PipelineConfigurationCredentials struct {
+	Username   PipelineConfigValue `yaml:"username,omitempty"`
+	Password   PipelineConfigValue `yaml:"password,omitempty"`
+	PrivateKey PipelineConfigValue `yaml:"private_key,omitempty"`
+}
+
+// PipelineConfigurationRepository defines values for the pipeline's git repository.
+type PipelineConfigurationRepository struct {
+	URL    string `yaml:"git_url"`
+	Branch string `yaml:"branch"`
+}
+
+// PipelineConfigurationFile defines the details of a Pipeline Configuration file which
+// configures a pipeline in its entirety. The files name will be used as the name for the
+// pipeline.
+type PipelineConfigurationFile struct {
+	Name                    string                           `yaml:"name"`
+	Schedule                string                           `yaml:"schedule"`
+	Credentials             PipelineConfigurationCredentials `yaml:"credentials"`
+	RepositoryConfiguration PipelineConfigurationRepository  `yaml:"git_repo_config"`
+	GitHubWebhookToken      PipelineConfigValue              `yaml:"github_webhook_token,omitempty"`
+	PipelineTags            []string                         `yaml:"tags,omitempty"`
 }
 
 // StoreConfig defines config settings to be stored in DB.

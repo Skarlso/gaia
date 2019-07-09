@@ -30,9 +30,10 @@ const (
 	// Version is the current version of gaia.
 	Version = "0.2.3"
 
-	dataFolder      = "data"
-	pipelinesFolder = "pipelines"
-	workspaceFolder = "workspace"
+	dataFolder             = "data"
+	pipelinesFolder        = "pipelines"
+	workspaceFolder        = "workspace"
+	pipelineConfigLocation = "pipeline_configs"
 )
 
 var fs *flag.FlagSet
@@ -66,6 +67,8 @@ func init() {
 	fs.StringVar(&gaia.Cfg.WorkerServerPort, "workerserverport", "8989", "Listen port for gaia worker gRPC communication")
 	fs.StringVar(&gaia.Cfg.WorkerTags, "workertags", "", "Comma separated list of custom tags for this worker")
 	fs.BoolVar(&gaia.Cfg.PreventPrimaryWork, "preventprimarywork", false, "If true, prevents the scheduler to schedule work on this Gaia primary instance")
+	fs.StringVar(&gaia.Cfg.PipelineConfigFilesLocation, "pipelineConfigLocation", "", "Folder which contains pipeline configuration files.")
+	fs.BoolVar(&gaia.Cfg.WatchForNewPipelineConfigurationFiles, "watchPipelineConfigs", false, "Whatch the PipelineConfigurationFilesLocation folder for new configuration files.")
 
 	// Default values
 	gaia.Cfg.Bolt.Mode = 0600
@@ -74,7 +77,7 @@ func init() {
 // Start initiates all components of Gaia and starts the server/agent.
 func Start() (err error) {
 	// Parse command line flags
-	fs.Parse(os.Args[1:])
+	_ = fs.Parse(os.Args[1:])
 
 	// Check version switch
 	if gaia.Cfg.VersionSwitch {
@@ -110,6 +113,21 @@ func Start() (err error) {
 		}
 		gaia.Cfg.HomePath = execPath
 		gaia.Cfg.Logger.Debug("executeable path found", "path", execPath)
+	}
+
+	// If PipelineConfigPath is not defined, we set it to the HomePath/pipeline_configs
+	if gaia.Cfg.PipelineConfigFilesLocation == "" {
+		path := filepath.Join(gaia.Cfg.HomePath, pipelineConfigLocation)
+		gaia.Cfg.PipelineConfigFilesLocation = path
+		err = os.MkdirAll(path, 0700)
+		if err != nil {
+			gaia.Cfg.Logger.Error("cannot create folder",
+				"error",
+				err.Error(),
+				"path",
+				gaia.Cfg.PipelineConfigFilesLocation)
+			return
+		}
 	}
 
 	// Set data path, workspace path and pipeline path relative to home folder and create it
@@ -234,6 +252,9 @@ func Start() (err error) {
 		return
 	}
 
+	// Generate Pipelines from Configuration.
+	generatePipelinesFromConfiguration()
+
 	switch gaia.Cfg.Mode {
 	case gaia.ModeServer:
 		// Start ticker. Periodic job to check for new plugins.
@@ -255,6 +276,23 @@ func Start() (err error) {
 		}
 	}
 	return
+}
+
+func generatePipelinesFromConfiguration() {
+	var configs []string
+	filepath.Walk(gaia.Cfg.PipelineConfigFilesLocation, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if filepath.Ext(path) == ".yaml" || filepath.Ext(path) == ".yml" {
+			configs = append(configs, filepath.Join(path, info.Name()))
+		}
+		return nil
+	})
+	if len(configs) < 1 {
+		return
+	}
+	gaia.Cfg.Logger.Info("found pipeline configuration files in pipelines config folder... processing.", "count", len(configs))
 }
 
 // findExecutablePath returns the absolute path for the current
