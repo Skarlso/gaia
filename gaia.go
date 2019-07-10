@@ -345,7 +345,7 @@ type PipelineConfigurationFile struct {
 	Credentials             PipelineConfigurationCredentials `yaml:"credentials"`
 	RepositoryConfiguration PipelineConfigurationRepository  `yaml:"git_repo_config"`
 	GitHubWebhookToken      PipelineConfigValue              `yaml:"github_webhook_token,omitempty"`
-	PipelineTags            []string                         `yaml:"tags,omitempty"`
+	PipelineTags            string                           `yaml:"tags,omitempty"`
 }
 
 // StoreConfig defines config settings to be stored in DB.

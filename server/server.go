@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/gaia-pipeline/gaia/workers/pipeline"
+	"gopkg.in/yaml.v2"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gaia-pipeline/flag"
@@ -105,14 +106,14 @@ func Start() (err error) {
 
 	// Find path for gaia home folder if not given by parameter
 	if gaia.Cfg.HomePath == "" {
-		// Find executeable path
+		// Find executable path
 		execPath, err := findExecutablePath()
 		if err != nil {
-			gaia.Cfg.Logger.Error("cannot find executeable path", "error", err.Error())
+			gaia.Cfg.Logger.Error("cannot find executable path", "error", err.Error())
 			return err
 		}
 		gaia.Cfg.HomePath = execPath
-		gaia.Cfg.Logger.Debug("executeable path found", "path", execPath)
+		gaia.Cfg.Logger.Debug("executable path found", "path", execPath)
 	}
 
 	// If PipelineConfigPath is not defined, we set it to the HomePath/pipeline_configs
@@ -253,7 +254,11 @@ func Start() (err error) {
 	}
 
 	// Generate Pipelines from Configuration.
-	generatePipelinesFromConfiguration()
+	err = generatePipelinesFromConfiguration()
+	if err != nil {
+		gaia.Cfg.Logger.Error("failed to parse pipeline configuration files", "error", err.Error())
+		return err
+	}
 
 	switch gaia.Cfg.Mode {
 	case gaia.ModeServer:
@@ -278,21 +283,47 @@ func Start() (err error) {
 	return
 }
 
-func generatePipelinesFromConfiguration() {
-	var configs []string
-	filepath.Walk(gaia.Cfg.PipelineConfigFilesLocation, func(path string, info os.FileInfo, err error) error {
+func scanPipelineConfigurationFiles() ([]gaia.PipelineConfigurationFile, error) {
+	var configFiles []string
+	var configs []gaia.PipelineConfigurationFile
+	err := filepath.Walk(gaia.Cfg.PipelineConfigFilesLocation, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
 		if filepath.Ext(path) == ".yaml" || filepath.Ext(path) == ".yml" {
-			configs = append(configs, filepath.Join(path, info.Name()))
+			configFiles = append(configFiles, path)
 		}
 		return nil
 	})
-	if len(configs) < 1 {
-		return
+	if err != nil {
+		return configs, err
 	}
-	gaia.Cfg.Logger.Info("found pipeline configuration files in pipelines config folder... processing.", "count", len(configs))
+	if len(configFiles) < 1 {
+		return configs, nil
+	}
+	gaia.Cfg.Logger.Info("found pipeline configuration files in pipelines config folder... processing.", "count", len(configFiles))
+
+	for _, f := range configFiles {
+		content, err := ioutil.ReadFile(f)
+		if err != nil {
+			return configs, err
+		}
+		conf := gaia.PipelineConfigurationFile{}
+		err = yaml.Unmarshal(content, &conf)
+		if err != nil {
+			return configs, err
+		}
+		configs = append(configs, conf)
+	}
+	return configs, nil
+}
+
+func generatePipelinesFromConfiguration() error {
+	_, err := scanPipelineConfigurationFiles()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // findExecutablePath returns the absolute path for the current
